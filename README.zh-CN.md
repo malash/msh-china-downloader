@@ -8,6 +8,12 @@ China 保险理赔下载器，基于微信端 H5（<https://wechat.mshasia.com/w
 
 [English](./README.md)
 
+## 演示
+
+https://github.com/user-attachments/assets/a711ed49-a1df-4b3f-b790-ec2a04e697d8
+
+> 演示中的姓名、理赔号、医院、金额及附件图片均已脱敏处理。
+
 ## 产物结构
 
 ```

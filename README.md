@@ -11,6 +11,13 @@ offline-browsable site.
 
 [中文文档](./README.zh-CN.md)
 
+## Demo
+
+https://github.com/user-attachments/assets/a711ed49-a1df-4b3f-b790-ec2a04e697d8
+
+> All names, claim numbers, hospitals, amounts, and attachment images in the demo have been
+> anonymized.
+
 ## What you get
 
 ```
