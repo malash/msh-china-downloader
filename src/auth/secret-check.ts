@@ -5,6 +5,9 @@ const WEB_URL = 'https://wechat.mshasia.com/wechat/';
 // The secret is split across two string literals in the bundle, so the full value
 // never appears verbatim. Probe the head and tail substrings instead.
 export const checkSignatureSecret = async (secret: string): Promise<void> => {
+  if (!secret) {
+    throw new Error('Missing SIGNATURE_SECRET environment variable (set it in .env)');
+  }
   try {
     const html = await (await fetch(WEB_URL, { signal: AbortSignal.timeout(15000) })).text();
 
