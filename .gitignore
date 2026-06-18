@@ -107,3 +107,6 @@ dist
 
 # Cached auth token
 .token
+
+# Downloaded claims
+output/

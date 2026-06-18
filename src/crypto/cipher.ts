@@ -52,11 +52,15 @@ const aesDecrypt = (session: Session, ciphertextB64: string): string => {
   return Buffer.concat([decipher.update(input), decipher.final()]).toString('utf8');
 };
 
-export const encryptParam = (session: Session, urlValue: string): string =>
+export const rsaEncrypt = (session: Session, plaintext: string): string =>
   publicEncrypt(
     { key: session.publicKey, padding: constants.RSA_PKCS1_PADDING },
-    Buffer.from(aesDecrypt(session, urlValue), 'utf8'),
+    Buffer.from(plaintext, 'utf8'),
   ).toString('base64');
+
+// URL params are AES-encrypted; recover the plaintext, then RSA-encrypt for the API.
+export const encryptParam = (session: Session, urlValue: string): string =>
+  rsaEncrypt(session, aesDecrypt(session, urlValue));
 
 export const decryptResult = <T = unknown>(session: Session, ciphertextB64: string): T =>
   JSON.parse(aesDecrypt(session, ciphertextB64)) as T;
