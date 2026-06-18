@@ -94,8 +94,7 @@ export const renderMarkdown = (
       ...present(rows).map(r => `| ${r.label} | ${r.value} |`),
     ].join('\n');
 
-  const section = (title: string, body: string, open: boolean) =>
-    `<details${open ? ' open' : ''}>\n<summary>${title}</summary>\n\n${body}\n\n</details>`;
+  const section = (title: string, body: string) => `## ${title}\n\n${body}`;
 
   const banks = uniqueAccounts(claim.claimAccInfoReturns ?? [])
     .map((acc, i) => `### 账户 ${i + 1}\n\n${table(bankFields(acc))}`)
@@ -109,13 +108,13 @@ export const renderMarkdown = (
     .join('\n\n');
 
   const sections = [
-    section('基本信息', table(basicInfo(claim)), true),
-    section('就诊信息', table(visitInfo(claim)), true),
-    section('金额信息', table(amountInfo(claim)), true),
-    section('被保险人信息', table(insuredInfo(claim)), false),
-    section('银行账户', banks, false),
-    ...(eob ? [section('理赔说明书', `![理赔说明书](images/${eob})`, false)] : []),
-    section(`已上传理赔资料（${images.length} 张）`, pics, true),
+    section('基本信息', table(basicInfo(claim))),
+    section('就诊信息', table(visitInfo(claim))),
+    section('金额信息', table(amountInfo(claim))),
+    section('被保险人信息', table(insuredInfo(claim))),
+    section('银行账户', banks),
+    ...(eob ? [section('理赔说明书', `![理赔说明书](images/${eob})`)] : []),
+    section(`已上传理赔资料（${images.length} 张）`, pics),
   ];
 
   return `# 理赔 ${claim.claimNo} · ${claim.statusName}

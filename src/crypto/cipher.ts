@@ -28,12 +28,9 @@ const PUBKEY_MAP: Record<string, string> = {
 };
 
 const deobfuscatePublicKey = (raw: string): KeyObject => {
-  let tail = '';
-  let s = raw;
-  if (raw.length % 2 === 1) {
-    tail = raw.slice(-1);
-    s = raw.slice(0, raw.lastIndexOf(tail));
-  }
+  const odd = raw.length % 2 === 1;
+  const tail = odd ? raw.slice(-1) : '';
+  const s = odd ? raw.slice(0, -1) : raw;
   const replaced = s.replace(/[!@#$%^&*]/g, c => PUBKEY_MAP[c]);
   const mid = s.length / 2;
   const der = Buffer.from(replaced.slice(mid) + replaced.slice(0, mid) + tail, 'base64');

@@ -65,7 +65,7 @@ $ yarn start
     · 2026: 4 claim(s)
     · 2025: 3 claim(s)
     · 2024: 1 claim(s)
-  8 unique claim(s), downloading 8 (concurrency 10)
+  8 unique claim(s), downloading 8 (concurrency 5)
     · [1/8] DB71***36 (处理中)
     · [2/8] DB05***82 (处理中)
     · [3/8] NDB47***12 (已结案)
@@ -77,7 +77,7 @@ $ yarn start
     · 2026: 3 claim(s)
     · 2025: 3 claim(s)
     · 2024: 2 claim(s)
-  8 unique claim(s), downloading 8 (concurrency 10)
+  8 unique claim(s), downloading 8 (concurrency 5)
     · [1/8] NDB36***49 (处理中)
     · [2/8] NDB72***05 (处理中)
     · [3/8] DB61***27 (处理中)
@@ -87,7 +87,7 @@ $ yarn start
 ▸ [3/3] Wang, Wu 王五 (子女)
   Policy years: 2026
     · 2026: 2 claim(s)
-  2 unique claim(s), downloading 2 (concurrency 10)
+  2 unique claim(s), downloading 2 (concurrency 5)
     · [1/2] NDB65***74 (处理中)
     · [2/2] NDB90***21 (处理中)
 

@@ -34,7 +34,7 @@
       </thead>
       <tbody>
 <% g.claims.forEach(function (c) { %>
-        <tr onclick="window.open('<%= c.href %>', '_blank')">
+        <tr data-href="<%= c.href %>" onclick="window.open(this.dataset.href, '_blank')">
           <td><%= c.startDate %></td>
           <td><span class="status s<%= c.status %><%= c.noPay ? ' no-pay' : '' %>"><%= c.statusName %></span></td>
           <td><%= c.hospital %></td>

@@ -5,7 +5,8 @@
   "main": "index.js",
   "license": "MIT",
   "scripts": {
-    "start": "node --import tsx --env-file-if-exists=.env src/index.ts",
+    "clean": "rimraf output",
+    "start": "yarn clean && node --import tsx --env-file-if-exists=.env src/index.ts",
     "lint": "prettier --write \"**/*.{ts,js,json,md}\"",
     "lint:check": "prettier --check \"**/*.{ts,js,json,md}\""
   },
@@ -18,6 +19,7 @@
     "@types/bluebird": "^3.5.42",
     "@types/node": "^25.9.3",
     "prettier": "^3.8.4",
+    "rimraf": "^6.1.3",
     "tsx": "^4.22.4"
   }
 }

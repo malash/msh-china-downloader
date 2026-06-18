@@ -1,4 +1,6 @@
-import { mkdir, writeFile } from 'node:fs/promises';
+import { mkdir } from 'node:fs/promises';
+import { createWriteStream } from 'node:fs';
+import { pipeline } from 'node:stream/promises';
 import type { Rider } from '../api/claim.js';
 import { sanitize } from '../util.js';
 
@@ -29,12 +31,12 @@ const downloadFile = async (url: string, dir: string, name: string): Promise<Sav
     try {
       const response = await fetch(url, { signal: AbortSignal.timeout(TIMEOUT_MS) });
       if (response.status === 404) return null;
-      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      if (!response.ok || !response.body) throw new Error(`HTTP ${response.status}`);
 
-      const buffer = Buffer.from(await response.arrayBuffer());
       const ext = extFromContentType(response.headers.get('content-type'), url);
-      await writeFile(`${dir}/${name}.${ext}`, buffer);
-      return { file: `${name}.${ext}`, ext };
+      const file = `${name}.${ext}`;
+      await pipeline(response.body, createWriteStream(`${dir}/${file}`));
+      return { file, ext };
     } catch (error) {
       if (attempt >= RETRIES) {
         throw new Error(`Failed to download ${url}: ${(error as Error).message}`);
