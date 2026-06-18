@@ -4,6 +4,7 @@ import { getClaimDetail, type Rider } from '../api/claim.js';
 import type { ClaimSummary } from '../api/claim-list.js';
 import { downloadImages, downloadOptional } from './images.js';
 import { renderHtml, renderMarkdown } from './render.js';
+import { sanitize } from '../util.js';
 
 const EOB_BASE =
   'https://wechat.mshasia.com/image/upfile/uploadfile/EobPath/rider/MshBat/APP/image';
@@ -21,8 +22,6 @@ const sortRiders = (riders: Rider[]): Rider[] => {
     .sort((a, b) => rank(a.r) - rank(b.r) || a.i - b.i)
     .map(x => x.r);
 };
-
-const sanitize = (s: string): string => s.replace(/[/\\:*?"<>|\s]/g, '_');
 
 // Saves the claim into `${claimsDir}/${name}/${date}_${claimNo}/` and returns
 // the `${name}/${date}_${claimNo}` path relative to claimsDir.

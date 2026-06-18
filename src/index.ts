@@ -11,6 +11,7 @@ import { getClaimList, type ClaimSummary } from './api/claim-list.js';
 import { downloadClaim } from './download/claim.js';
 import { renderIndex, sortClaims, type PersonGroup } from './download/index-page.js';
 import { done, info, item, step } from './log.js';
+import { sanitize } from './util.js';
 
 const OUTPUT_DIR = fileURLToPath(new URL('../output/', import.meta.url));
 const CLAIMS_DIR = join(OUTPUT_DIR, 'claims');
@@ -25,8 +26,6 @@ if (!username || !password) {
 const maxPerPerson = Number(process.env.MAX_CLAIMS_PER_PERSON) || Infinity;
 // How many claims to download in parallel.
 const concurrency = Number(process.env.CONCURRENCY) || 5;
-
-const sanitize = (s: string): string => s.replace(/[/\\:*?"<>|\s]/g, '_');
 
 const writeJson = (path: string, data: unknown) => writeFile(path, JSON.stringify(data, null, 2));
 

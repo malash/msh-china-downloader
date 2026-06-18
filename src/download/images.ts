@@ -1,5 +1,6 @@
 import { mkdir, writeFile } from 'node:fs/promises';
 import type { Rider } from '../api/claim.js';
+import { sanitize } from '../util.js';
 
 export interface DownloadedImage {
   rider: Rider;
@@ -42,8 +43,6 @@ const downloadFile = async (url: string, dir: string, name: string): Promise<Sav
   }
 };
 
-const sanitize = (name: string): string => name.replace(/[/\\:*?"<>|]/g, '_');
-
 export const downloadImages = async (riders: Rider[], dir: string): Promise<DownloadedImage[]> => {
   await mkdir(dir, { recursive: true });
 
@@ -51,7 +50,7 @@ export const downloadImages = async (riders: Rider[], dir: string): Promise<Down
   const used = new Map<string, number>();
   let unknown = 0;
   for (const rider of riders) {
-    let name = sanitize(rider.riderTypeName.trim());
+    let name = sanitize(rider.riderTypeName);
     if (!name) {
       unknown += 1;
       name = `UNKNOWN${unknown === 1 ? '' : unknown}`;
