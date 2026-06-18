@@ -161,7 +161,8 @@ output/
 ## 开发须知
 
 - 运行：`yarn start`（用 tsx 跑，自动加载 `.env`；macOS 下跑完会自动打开产物）。
-- **每次改完代码都跑 `npx tsc --noEmit` 做类型检查**——tsx 运行时不做类型检查，只靠它兜底。
+- **每次改完代码都跑 `yarn typecheck`（即
+  `tsc --noEmit`）做类型检查**——tsx 运行时不做类型检查，只靠它兜底。
 - 格式化：`yarn lint`（prettier 写入）/ `yarn lint:check`（校验）。
 - 测试时用 `MAX_CLAIMS_PER_PERSON=N` 限制每人下载条数，避免一跑就拉几百条。
 - 探接口时经常会写一次性脚本（比如

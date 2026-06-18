@@ -2,24 +2,27 @@
   "name": "msh-china-downloader",
   "version": "1.0.0",
   "type": "module",
-  "main": "index.js",
   "license": "MIT",
+  "engines": {
+    "node": ">=22.9.0"
+  },
   "scripts": {
     "clean": "rimraf output",
     "start": "yarn clean && node --import tsx --env-file-if-exists=.env src/index.ts",
+    "typecheck": "tsc --noEmit",
     "lint": "prettier --write \"**/*.{ts,js,json,md}\"",
     "lint:check": "prettier --check \"**/*.{ts,js,json,md}\""
   },
   "dependencies": {
     "bluebird": "^3.7.2",
-    "eta": "^4.6.0",
-    "typescript": "^6.0.3"
+    "eta": "^4.6.0"
   },
   "devDependencies": {
     "@types/bluebird": "^3.5.42",
     "@types/node": "^25.9.3",
     "prettier": "^3.8.4",
     "rimraf": "^6.1.3",
-    "tsx": "^4.22.4"
+    "tsx": "^4.22.4",
+    "typescript": "^6.0.3"
   }
 }
