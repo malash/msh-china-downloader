@@ -42,7 +42,7 @@ export const downloadClaim = async (
   const eobInfo = await getEobFileInfo(claim.claimNo);
   const eob = eobInfo && {
     image: await downloadOptional(eobInfo.picUrl, imagesDir, 'eob'),
-    pdf: await downloadOptional(eobInfo.url, imagesDir, 'eob'),
+    pdf: await downloadOptional(eobInfo.url, imagesDir, 'eob-pdf'),
   };
 
   await Promise.all([
