@@ -45,7 +45,11 @@
 <% s.images.forEach(function (img) { %>
     <figure>
       <figcaption><%= img.caption %></figcaption>
+<% if (img.isImage) { %>
       <a href="images/<%= img.file %>" target="_blank"><img src="images/<%= img.file %>" alt="<%= img.caption %>"></a>
+<% } else { %>
+      <a href="images/<%= img.file %>" target="_blank"><%= img.file %></a>
+<% } %>
     </figure>
 <% }) %>
 <% } %>

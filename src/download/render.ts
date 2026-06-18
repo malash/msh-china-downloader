@@ -82,6 +82,8 @@ const uniqueAccounts = (accounts: BankAccount[]): BankAccount[] => {
 
 const present = (rows: Field[]): Field[] => rows.filter(r => r.value);
 
+const isImageFile = (file: string): boolean => /\.(jpe?g|png|gif|webp|bmp|svg)$/i.test(file);
+
 export const renderMarkdown = (
   claim: ClaimDetail,
   images: DownloadedImage[],
@@ -95,16 +97,15 @@ export const renderMarkdown = (
     ].join('\n');
 
   const section = (title: string, body: string) => `## ${title}\n\n${body}`;
+  const embed = (caption: string, file: string) =>
+    `${isImageFile(file) ? '!' : ''}[${caption}](images/${file})`;
 
   const banks = uniqueAccounts(claim.claimAccInfoReturns ?? [])
     .map((acc, i) => `### 账户 ${i + 1}\n\n${table(bankFields(acc))}`)
     .join('\n\n');
 
   const pics = images
-    .map(
-      ({ rider, file }) =>
-        `### ${rider.riderTypeName}\n\n![${rider.riderTypeName}](images/${file})`,
-    )
+    .map(({ rider, file }) => `### ${rider.riderTypeName}\n\n${embed(rider.riderTypeName, file)}`)
     .join('\n\n');
 
   const sections = [
@@ -113,7 +114,7 @@ export const renderMarkdown = (
     section('金额信息', table(amountInfo(claim))),
     section('被保险人信息', table(insuredInfo(claim))),
     section('银行账户', banks),
-    ...(eob ? [section('理赔说明书', `![理赔说明书](images/${eob})`)] : []),
+    ...(eob ? [section('理赔说明书', embed('理赔说明书', eob))] : []),
     section(`已上传理赔资料（${images.length} 张）`, pics),
   ];
 
@@ -141,12 +142,22 @@ export const renderHtml = (
       ),
     },
     ...(eob
-      ? [{ title: '理赔说明书', open: false, images: [{ caption: '理赔说明书', file: eob }] }]
+      ? [
+          {
+            title: '理赔说明书',
+            open: false,
+            images: [{ caption: '理赔说明书', file: eob, isImage: isImageFile(eob) }],
+          },
+        ]
       : []),
     {
       title: `已上传理赔资料（${images.length} 张）`,
       open: true,
-      images: images.map(({ rider, file }) => ({ caption: rider.riderTypeName, file })),
+      images: images.map(({ rider, file }) => ({
+        caption: rider.riderTypeName,
+        file,
+        isImage: isImageFile(file),
+      })),
     },
   ];
 
