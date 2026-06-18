@@ -3,7 +3,7 @@ import { fileURLToPath } from 'node:url';
 import { join } from 'node:path';
 import { spawn } from 'node:child_process';
 import Bluebird from 'bluebird';
-import { ensureLogin } from './auth/login.js';
+import { login } from './auth/login.js';
 import { checkSignatureSecret } from './auth/secret-check.js';
 import { getPersons, RELATIONSHIP } from './api/persons.js';
 import { getPolicies } from './api/policies.js';
@@ -33,7 +33,7 @@ step('Checking SIGNATURE_SECRET against latest app.js');
 await checkSignatureSecret(process.env.SIGNATURE_SECRET ?? '');
 
 step('Logging in');
-await ensureLogin(account, password);
+await login(account, password);
 await mkdir(CLAIMS_DIR, { recursive: true });
 
 const persons = await getPersons(account);

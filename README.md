@@ -123,6 +123,6 @@ Everything is offline: images are saved locally and all links are relative.
 
 ## Notes
 
-- The auth token is cached in `.token` and reused until it expires.
+- The tool logs in fresh on every run; no token is cached locally.
 - On startup the tool checks whether `SIGNATURE_SECRET` still matches the live site and warns
   (without stopping) if it has changed.

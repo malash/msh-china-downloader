@@ -1,7 +1,6 @@
 import { randomUUID } from 'node:crypto';
 import { fetchWithSign, negotiateSession, setToken } from '../http/client.js';
 import { encryptJson, generateUuid } from '../crypto/cipher.js';
-import { readToken, writeToken } from './token-store.js';
 
 interface LoginResult {
   token: string;
@@ -46,25 +45,5 @@ export const login = async (account: string, password: string): Promise<LoginRes
   }
 
   setToken(result.token);
-  await writeToken(result.token);
   return result;
-};
-
-export const checkLogin = async (account: string): Promise<boolean> => {
-  const { success } = await fetchWithSign<{ success: string }>(
-    '/appwechat/com/separated/getPersonalInfo',
-    { employeeID: account, usernameType: '01' },
-  );
-  return success === 't';
-};
-
-export const ensureLogin = async (account: string, password: string): Promise<void> => {
-  const cached = await readToken();
-  if (cached) {
-    setToken(cached);
-    if (await checkLogin(account)) {
-      return;
-    }
-  }
-  await login(account, password);
 };

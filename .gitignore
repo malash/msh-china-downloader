@@ -105,8 +105,5 @@ dist
 .tern-port
 *.secret
 
-# Cached auth token
-.token
-
 # Downloaded claims
 output/
