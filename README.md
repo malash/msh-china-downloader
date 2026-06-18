@@ -38,12 +38,12 @@ https://github.com/user-attachments/assets/a711ed49-a1df-4b3f-b790-ec2a04e697d8
    cp .env.example .env
    ```
 
-   | Variable                | Required | Description                                                      |
-   | ----------------------- | -------- | ---------------------------------------------------------------- |
-   | `USERNAME` / `PASSWORD` | yes      | Your MSH login                                                   |
-   | `SIGNATURE_SECRET`      | yes      | Request-signing secret (a working value ships in `.env.example`) |
-   | `CONCURRENCY`           | no       | Parallel downloads (default 5)                                   |
-   | `MAX_CLAIMS_PER_PERSON` | no       | Cap per person, for testing (default: no limit)                  |
+   | Variable                       | Required | Description                                                      |
+   | ------------------------------ | -------- | ---------------------------------------------------------------- |
+   | `MSH_ACCOUNT` / `MSH_PASSWORD` | yes      | Your MSH login                                                   |
+   | `SIGNATURE_SECRET`             | yes      | Request-signing secret (a working value ships in `.env.example`) |
+   | `CONCURRENCY`                  | no       | Parallel downloads (default 5)                                   |
+   | `MAX_CLAIMS_PER_PERSON`        | no       | Cap per person, for testing (default: no limit)                  |
 
 3. Run:
 

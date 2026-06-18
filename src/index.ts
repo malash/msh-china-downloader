@@ -16,10 +16,10 @@ import { sanitize } from './util.js';
 const OUTPUT_DIR = fileURLToPath(new URL('../output/', import.meta.url));
 const CLAIMS_DIR = join(OUTPUT_DIR, 'claims');
 
-const username = process.env.USERNAME;
-const password = process.env.PASSWORD;
-if (!username || !password) {
-  throw new Error('Missing USERNAME / PASSWORD environment variables (set them in .env)');
+const account = process.env.MSH_ACCOUNT;
+const password = process.env.MSH_PASSWORD;
+if (!account || !password) {
+  throw new Error('Missing MSH_ACCOUNT / MSH_PASSWORD environment variables (set them in .env)');
 }
 
 // Optional cap for testing, to avoid downloading everything. Empty = no limit.
@@ -33,10 +33,10 @@ step('Checking SIGNATURE_SECRET against latest app.js');
 await checkSignatureSecret(process.env.SIGNATURE_SECRET ?? '');
 
 step('Logging in');
-await ensureLogin(username, password);
+await ensureLogin(account, password);
 await mkdir(CLAIMS_DIR, { recursive: true });
 
-const persons = await getPersons(username);
+const persons = await getPersons(account);
 await writeJson(join(OUTPUT_DIR, 'persons.json'), persons);
 done(`Logged in — ${persons.length} insured person(s) found`);
 
@@ -51,7 +51,7 @@ for (const [pi, person] of persons.entries()) {
   await mkdir(personDir, { recursive: true });
 
   // Collect claims across every policy year, de-duplicated by claimNo.
-  const policies = await getPolicies(person.customID, username);
+  const policies = await getPolicies(person.customID, account);
   await writeJson(join(personDir, 'policies.json'), policies);
   info(`Policy years: ${policies.map(p => p.contYear).join(', ')}`);
 

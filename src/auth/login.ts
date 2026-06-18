@@ -10,11 +10,11 @@ interface LoginResult {
   [key: string]: unknown;
 }
 
-export const login = async (username: string, password: string): Promise<LoginResult> => {
+export const login = async (account: string, password: string): Promise<LoginResult> => {
   const session = await negotiateSession(generateUuid());
 
   const securityData = encryptJson(session, {
-    account: username,
+    account,
     password,
     verifyCode: '',
     sign: '',
@@ -50,21 +50,21 @@ export const login = async (username: string, password: string): Promise<LoginRe
   return result;
 };
 
-export const checkLogin = async (username: string): Promise<boolean> => {
+export const checkLogin = async (account: string): Promise<boolean> => {
   const { success } = await fetchWithSign<{ success: string }>(
     '/appwechat/com/separated/getPersonalInfo',
-    { employeeID: username, usernameType: '01' },
+    { employeeID: account, usernameType: '01' },
   );
   return success === 't';
 };
 
-export const ensureLogin = async (username: string, password: string): Promise<void> => {
+export const ensureLogin = async (account: string, password: string): Promise<void> => {
   const cached = await readToken();
   if (cached) {
     setToken(cached);
-    if (await checkLogin(username)) {
+    if (await checkLogin(account)) {
       return;
     }
   }
-  await login(username, password);
+  await login(account, password);
 };

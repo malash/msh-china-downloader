@@ -31,12 +31,12 @@ https://github.com/user-attachments/assets/a711ed49-a1df-4b3f-b790-ec2a04e697d8
    cp .env.example .env
    ```
 
-   | 变量                    | 必填 | 说明                                        |
-   | ----------------------- | ---- | ------------------------------------------- |
-   | `USERNAME` / `PASSWORD` | 是   | MSH 登录账号密码                            |
-   | `SIGNATURE_SECRET`      | 是   | 请求签名密钥（`.env.example` 里已附可用值） |
-   | `CONCURRENCY`           | 否   | 并发下载数（默认 5）                        |
-   | `MAX_CLAIMS_PER_PERSON` | 否   | 每人下载上限，测试用（默认不限）            |
+   | 变量                           | 必填 | 说明                                        |
+   | ------------------------------ | ---- | ------------------------------------------- |
+   | `MSH_ACCOUNT` / `MSH_PASSWORD` | 是   | MSH 登录账号密码                            |
+   | `SIGNATURE_SECRET`             | 是   | 请求签名密钥（`.env.example` 里已附可用值） |
+   | `CONCURRENCY`                  | 否   | 并发下载数（默认 5）                        |
+   | `MAX_CLAIMS_PER_PERSON`        | 否   | 每人下载上限，测试用（默认不限）            |
 
 3. 运行：
 
