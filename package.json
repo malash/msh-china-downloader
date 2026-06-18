@@ -1,0 +1,17 @@
+{
+	"name": "msh-china-downloader",
+	"version": "1.0.0",
+	"type": "module",
+	"main": "index.js",
+	"license": "MIT",
+	"scripts": {
+		"start": "node --loader ts-node/esm --env-file-if-exists=.env src/index.ts"
+	},
+	"dependencies": {
+		"ts-node": "^10.9.2",
+		"typescript": "^6.0.3"
+	},
+	"devDependencies": {
+		"@types/node": "^25.9.3"
+	}
+}
