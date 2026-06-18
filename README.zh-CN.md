@@ -44,9 +44,58 @@ https://github.com/user-attachments/assets/a711ed49-a1df-4b3f-b790-ec2a04e697d8
    yarn start
    ```
 
-   macOS 上下载完成后会自动打开总览页。
-
 ## 产物结构
+
+所有内容都会写入 `output/` 目录。用任意浏览器打开 `output/index.html`
+即可浏览；macOS 上运行结束后会自动打开。
+
+运行过程大致如下：
+
+```text
+$ yarn start
+
+▸ Checking SIGNATURE_SECRET against latest app.js
+  ✓ SIGNATURE_SECRET is up to date
+
+▸ Logging in
+  ✓ Logged in — 3 insured person(s) found
+
+▸ [1/3] Zhang, San 张三 (本人)
+  Policy years: 2026, 2025, 2024
+    · 2026: 4 claim(s)
+    · 2025: 3 claim(s)
+    · 2024: 1 claim(s)
+  8 unique claim(s), downloading 8 (concurrency 10)
+    · [1/8] DB71***36 (处理中)
+    · [2/8] DB05***82 (处理中)
+    · [3/8] NDB47***12 (已结案)
+    · ...
+    · [8/8] NDB80***54 (已结案)
+
+▸ [2/3] Li, Si 李四 (配偶)
+  Policy years: 2026, 2025, 2024
+    · 2026: 3 claim(s)
+    · 2025: 3 claim(s)
+    · 2024: 2 claim(s)
+  8 unique claim(s), downloading 8 (concurrency 10)
+    · [1/8] NDB36***49 (处理中)
+    · [2/8] NDB72***05 (处理中)
+    · [3/8] DB61***27 (处理中)
+    · ...
+    · [8/8] DB83***19 (已结案)
+
+▸ [3/3] Wang, Wu 王五 (子女)
+  Policy years: 2026
+    · 2026: 2 claim(s)
+  2 unique claim(s), downloading 2 (concurrency 10)
+    · [1/2] NDB65***74 (处理中)
+    · [2/2] NDB90***21 (处理中)
+
+▸ Writing index.html
+  ✓ Opening /path/to/output/index.html
+```
+
+产物的目录结构：
 
 ```
 output/

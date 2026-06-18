@@ -7,11 +7,15 @@ A downloader for MSH China insurance claims, built on the APIs behind the WeChat
 policy year, and saves **all** claims — text details and attachment images — as a self-contained,
 offline-browsable site.
 
-> **⚠️ Vibe coded — use with caution.**
-> This project was built entirely through AI-assisted vibe coding and has not been audited. The implementation may contain subtle bugs or edge cases that were never considered. Review carefully and use at your own risk.
+> **⚠️ Vibe coded — use with caution.** This project was built entirely through AI-assisted vibe
+> coding and has not been audited. The implementation may contain subtle bugs or edge cases that
+> were never considered. Review carefully and use at your own risk.
 
-> **⚠️ Reverse-engineered — no official API.**
-> There is no public MSH API; the entire protocol was reverse-engineered from the WeChat H5 front-end bundle. It is undocumented and unaffiliated with MSH, may break at any time if they change their site, and could in theory violate their terms of service. Use only with your own account and your own data, for personal archiving — not for any commercial or large-scale purpose. You bear all responsibility for how you use it.
+> **⚠️ Reverse-engineered — no official API.** There is no public MSH API; the entire protocol was
+> reverse-engineered from the WeChat H5 front-end bundle. It is undocumented and unaffiliated with
+> MSH, may break at any time if they change their site, and could in theory violate their terms of
+> service. Use only with your own account and your own data, for personal archiving — not for any
+> commercial or large-scale purpose. You bear all responsibility for how you use it.
 
 ## Demo
 
@@ -47,9 +51,58 @@ https://github.com/user-attachments/assets/a711ed49-a1df-4b3f-b790-ec2a04e697d8
    yarn start
    ```
 
-   On macOS the overview page opens automatically when done.
-
 ## What you get
+
+Everything is written to the `output/` directory. Open `output/index.html` in any browser to start
+browsing. On macOS it opens automatically when the run finishes.
+
+A run looks like this:
+
+```text
+$ yarn start
+
+▸ Checking SIGNATURE_SECRET against latest app.js
+  ✓ SIGNATURE_SECRET is up to date
+
+▸ Logging in
+  ✓ Logged in — 3 insured person(s) found
+
+▸ [1/3] Zhang, San 张三 (本人)
+  Policy years: 2026, 2025, 2024
+    · 2026: 4 claim(s)
+    · 2025: 3 claim(s)
+    · 2024: 1 claim(s)
+  8 unique claim(s), downloading 8 (concurrency 10)
+    · [1/8] DB71***36 (处理中)
+    · [2/8] DB05***82 (处理中)
+    · [3/8] NDB47***12 (已结案)
+    · ...
+    · [8/8] NDB80***54 (已结案)
+
+▸ [2/3] Li, Si 李四 (配偶)
+  Policy years: 2026, 2025, 2024
+    · 2026: 3 claim(s)
+    · 2025: 3 claim(s)
+    · 2024: 2 claim(s)
+  8 unique claim(s), downloading 8 (concurrency 10)
+    · [1/8] NDB36***49 (处理中)
+    · [2/8] NDB72***05 (处理中)
+    · [3/8] DB61***27 (处理中)
+    · ...
+    · [8/8] DB83***19 (已结案)
+
+▸ [3/3] Wang, Wu 王五 (子女)
+  Policy years: 2026
+    · 2026: 2 claim(s)
+  2 unique claim(s), downloading 2 (concurrency 10)
+    · [1/2] NDB65***74 (处理中)
+    · [2/2] NDB90***21 (处理中)
+
+▸ Writing index.html
+  ✓ Opening /path/to/output/index.html
+```
+
+And the output tree it produces:
 
 ```
 output/
