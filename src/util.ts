@@ -1,5 +1,6 @@
-// Turns an arbitrary string into a filesystem-safe path segment: trims the
-// ends, then replaces path separators, reserved characters, and any internal
-// whitespace with `_`. Whitespace-only input collapses to '' (so callers can
-// fall back to a placeholder name).
+// Sanitizes a string into a filesystem-safe path segment. '' if all whitespace.
 export const sanitize = (s: string): string => s.trim().replace(/[/\\:*?"<>|\s]/g, '_');
+
+// Joins segments into a `/`-separated, percent-encoded relative URL.
+export const toRelativeUrl = (segments: string[]): string =>
+  segments.map(encodeURIComponent).join('/');

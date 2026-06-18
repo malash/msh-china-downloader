@@ -33,7 +33,7 @@ export const renderIndex = (groups: PersonGroup[]): string => {
     name: g.name,
     relationship: g.relationship,
     claims: sortClaims(g.claims).map(({ summary, folder }) => ({
-      href: `claims/${folder.split('/').map(encodeURIComponent).join('/')}/index.html`,
+      href: `claims/${folder}/index.html`,
       startDate: summary.startDate,
       status: summary.status,
       statusName: summary.statusName,

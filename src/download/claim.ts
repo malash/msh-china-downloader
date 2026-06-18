@@ -2,12 +2,10 @@ import { mkdir, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { getClaimDetail, type Rider } from '../api/claim.js';
 import type { ClaimSummary } from '../api/claim-list.js';
+import { getEobFileInfo } from '../api/eob.js';
 import { downloadImages, downloadOptional } from './images.js';
 import { renderHtml, renderMarkdown } from './render.js';
-import { sanitize } from '../util.js';
-
-const EOB_BASE =
-  'https://wechat.mshasia.com/image/upfile/uploadfile/EobPath/rider/MshBat/APP/image';
+import { sanitize, toRelativeUrl } from '../util.js';
 
 // 病历, 原始发票/收据, 费用明细 first; everything else keeps its original order after.
 const RIDER_ORDER = ['BST00003', 'BST00002', 'BST00005'];
@@ -32,13 +30,20 @@ export const downloadClaim = async (
 ): Promise<string> => {
   const claim = await getClaimDetail(summary.claimNo, summary.employeeId);
 
-  const relPath = join(sanitize(personName), sanitize(`${summary.startDate}_${claim.claimNo}`));
-  const dir = join(claimsDir, relPath);
+  const segments = [sanitize(personName), sanitize(`${summary.startDate}_${claim.claimNo}`)];
+  const dir = join(claimsDir, ...segments);
   const imagesDir = join(dir, 'images');
   await mkdir(imagesDir, { recursive: true });
 
   const images = await downloadImages(sortRiders(claim.riderInfoReturn), imagesDir);
-  const eob = await downloadOptional(`${EOB_BASE}/${claim.claimNo}.jpg`, imagesDir, 'eob');
+
+  // EOB is generated on demand: getEobFileInfo triggers it and returns the
+  // image + PDF URLs. Download both — the page shows the image, links to the PDF.
+  const eobInfo = await getEobFileInfo(claim.claimNo);
+  const eob = eobInfo && {
+    image: await downloadOptional(eobInfo.picUrl, imagesDir, 'eob'),
+    pdf: await downloadOptional(eobInfo.url, imagesDir, 'eob'),
+  };
 
   await Promise.all([
     writeFile(join(dir, 'detail.json'), JSON.stringify(claim, null, 2)),
@@ -46,5 +51,5 @@ export const downloadClaim = async (
     writeFile(join(dir, 'index.html'), renderHtml(claim, images, eob)),
   ]);
 
-  return relPath;
+  return toRelativeUrl(segments);
 };

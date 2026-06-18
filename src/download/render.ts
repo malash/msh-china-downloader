@@ -1,6 +1,7 @@
 import type { BankAccount, ClaimDetail } from '../api/claim.js';
 import type { DownloadedImage } from './images.js';
 import { eta } from './template.js';
+import { toRelativeUrl } from '../util.js';
 
 interface Field {
   label: string;
@@ -84,10 +85,15 @@ const present = (rows: Field[]): Field[] => rows.filter(r => r.value);
 
 const isImageFile = (file: string): boolean => /\.(jpe?g|png|gif|webp|bmp|svg)$/i.test(file);
 
+export interface Eob {
+  image: string | null;
+  pdf: string | null;
+}
+
 export const renderMarkdown = (
   claim: ClaimDetail,
   images: DownloadedImage[],
-  eob: string | null,
+  eob: Eob | null,
 ): string => {
   const table = (rows: Field[]) =>
     [
@@ -98,7 +104,13 @@ export const renderMarkdown = (
 
   const section = (title: string, body: string) => `## ${title}\n\n${body}`;
   const embed = (caption: string, file: string) =>
-    `${isImageFile(file) ? '!' : ''}[${caption}](images/${file})`;
+    `${isImageFile(file) ? '!' : ''}[${caption}](${toRelativeUrl(['images', file])})`;
+
+  const eobBody = eob
+    ? [eob.image && embed('理赔说明书', eob.image), eob.pdf && embed('PDF', eob.pdf)]
+        .filter(Boolean)
+        .join('\n\n')
+    : '';
 
   const banks = uniqueAccounts(claim.claimAccInfoReturns ?? [])
     .map((acc, i) => `### 账户 ${i + 1}\n\n${table(bankFields(acc))}`)
@@ -114,7 +126,7 @@ export const renderMarkdown = (
     section('金额信息', table(amountInfo(claim))),
     section('被保险人信息', table(insuredInfo(claim))),
     section('银行账户', banks),
-    ...(eob ? [section('理赔说明书', embed('理赔说明书', eob))] : []),
+    ...(eobBody ? [section('理赔说明书', eobBody)] : []),
     section(`已上传理赔资料（${images.length} 张）`, pics),
   ];
 
@@ -127,8 +139,27 @@ ${sections.join('\n\n')}
 export const renderHtml = (
   claim: ClaimDetail,
   images: DownloadedImage[],
-  eob: string | null,
+  eob: Eob | null,
 ): string => {
+  const eobImages = [];
+  if (eob?.image) {
+    eobImages.push({
+      caption: '理赔说明书',
+      file: eob.image,
+      url: toRelativeUrl(['images', eob.image]),
+      href: toRelativeUrl(['images', eob.pdf ?? eob.image]),
+      isImage: true,
+    });
+  } else if (eob?.pdf) {
+    eobImages.push({
+      caption: '理赔说明书',
+      file: eob.pdf,
+      url: toRelativeUrl(['images', eob.pdf]),
+      href: toRelativeUrl(['images', eob.pdf]),
+      isImage: false,
+    });
+  }
+
   const sections = [
     { title: '基本信息', status: claim.statusName, open: true, fields: present(basicInfo(claim)) },
     { title: '就诊信息', open: true, fields: present(visitInfo(claim)) },
@@ -141,21 +172,15 @@ export const renderHtml = (
         present(bankFields(acc)),
       ),
     },
-    ...(eob
-      ? [
-          {
-            title: '理赔说明书',
-            open: false,
-            images: [{ caption: '理赔说明书', file: eob, isImage: isImageFile(eob) }],
-          },
-        ]
-      : []),
+    ...(eobImages.length ? [{ title: '理赔说明书', open: true, images: eobImages }] : []),
     {
       title: `已上传理赔资料（${images.length} 张）`,
       open: true,
       images: images.map(({ rider, file }) => ({
         caption: rider.riderTypeName,
         file,
+        url: toRelativeUrl(['images', file]),
+        href: toRelativeUrl(['images', file]),
         isImage: isImageFile(file),
       })),
     },
