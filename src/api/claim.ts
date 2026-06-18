@@ -77,13 +77,21 @@ export const getClaimDetail = async (
   const uuid = generateUuid();
   const session = await negotiateSession(uuid);
 
-  const { result } = await fetchWithSign<{ result: string }>('/appwechat/claim/detail', {
+  const { success, result, msg } = await fetchWithSign<{
+    success: string;
+    result: string;
+    msg?: string;
+  }>('/appwechat/claim/detail', {
     claimNo: rsaEncrypt(session, claimNo),
     employeeId: encryptParam(session, employeeId),
     language: 'zh_cn',
     olClaimNo,
     uuid,
   });
+
+  if (success !== 't') {
+    throw new Error(`getClaimDetail failed: ${msg || success}`);
+  }
 
   return decryptResult<ClaimDetail>(session, result);
 };
