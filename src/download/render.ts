@@ -1,7 +1,7 @@
 import type { BankAccount, ClaimDetail } from '../api/claim.js';
 import type { DownloadedImage } from './images.js';
 import { eta } from './template.js';
-import { toRelativeUrl } from '../util.js';
+import { hasAmount, toRelativeUrl } from '../util.js';
 
 interface Field {
   label: string;
@@ -10,7 +10,8 @@ interface Field {
 
 const SEX: Record<string, string> = { '01': '男', '02': '女' };
 
-const money = (currency: string, amount: string): string => (amount ? `${currency} ${amount}` : '');
+const money = (currency: string, amount: string): string =>
+  hasAmount(amount) ? `${currency} ${amount}` : '';
 
 const basicInfo = (claim: ClaimDetail): Field[] => [
   { label: '理赔号', value: claim.claimNo },

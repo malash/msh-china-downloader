@@ -1,5 +1,6 @@
 import type { ClaimSummary } from '../api/claim-list.js';
 import { eta } from './template.js';
+import { hasAmount } from '../util.js';
 
 export interface ClaimRow {
   summary: ClaimSummary;
@@ -23,10 +24,8 @@ export const sortClaims = (claims: ClaimRow[]): ClaimRow[] =>
       b.summary.startDate.localeCompare(a.summary.startDate),
   );
 
-const hasPay = (amount: string): boolean => !!amount && amount !== '--' && Number(amount) > 0;
-
 const money = (currency: string, amount: string): string =>
-  hasPay(amount) ? `${currency} ${amount}` : '--';
+  hasAmount(amount) ? `${currency} ${amount}` : '--';
 
 export const renderIndex = (groups: PersonGroup[]): string => {
   const view = groups.map(g => ({
@@ -41,7 +40,7 @@ export const renderIndex = (groups: PersonGroup[]): string => {
       invoiceAmount: money(summary.invoiceCurrency, summary.invoiceAmount),
       payAmount: money(summary.currency, summary.payAmount),
       // settled (1/4/5) but paid nothing → flag the status tag red
-      noPay: !hasPay(summary.payAmount) && ['1', '4', '5'].includes(summary.status),
+      noPay: !hasAmount(summary.payAmount) && ['1', '4', '5'].includes(summary.status),
       claimNo: summary.claimNo,
     })),
   }));
