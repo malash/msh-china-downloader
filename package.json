@@ -1,17 +1,23 @@
 {
-	"name": "msh-china-downloader",
-	"version": "1.0.0",
-	"type": "module",
-	"main": "index.js",
-	"license": "MIT",
-	"scripts": {
-		"start": "node --loader ts-node/esm --env-file-if-exists=.env src/index.ts"
-	},
-	"dependencies": {
-		"ts-node": "^10.9.2",
-		"typescript": "^6.0.3"
-	},
-	"devDependencies": {
-		"@types/node": "^25.9.3"
-	}
+  "name": "msh-china-downloader",
+  "version": "1.0.0",
+  "type": "module",
+  "main": "index.js",
+  "license": "MIT",
+  "scripts": {
+    "start": "node --import tsx --env-file-if-exists=.env src/index.ts",
+    "lint": "prettier --write \"**/*.{ts,js,json,md}\"",
+    "lint:check": "prettier --check \"**/*.{ts,js,json,md}\""
+  },
+  "dependencies": {
+    "bluebird": "^3.7.2",
+    "eta": "^4.6.0",
+    "typescript": "^6.0.3"
+  },
+  "devDependencies": {
+    "@types/bluebird": "^3.5.42",
+    "@types/node": "^25.9.3",
+    "prettier": "^3.8.4",
+    "tsx": "^4.22.4"
+  }
 }

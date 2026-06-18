@@ -5,7 +5,8 @@ import type { ClaimSummary } from '../api/claim-list.js';
 import { downloadImages, downloadOptional } from './images.js';
 import { renderHtml, renderMarkdown } from './render.js';
 
-const EOB_BASE = 'https://wechat.mshasia.com/image/upfile/uploadfile/EobPath/rider/MshBat/APP/image';
+const EOB_BASE =
+  'https://wechat.mshasia.com/image/upfile/uploadfile/EobPath/rider/MshBat/APP/image';
 
 // 病历, 原始发票/收据, 费用明细 first; everything else keeps its original order after.
 const RIDER_ORDER = ['BST00003', 'BST00002', 'BST00005'];
@@ -15,7 +16,10 @@ const sortRiders = (riders: Rider[]): Rider[] => {
     const i = RIDER_ORDER.indexOf(r.riderType);
     return i === -1 ? RIDER_ORDER.length : i;
   };
-  return riders.map((r, i) => ({ r, i })).sort((a, b) => rank(a.r) - rank(b.r) || a.i - b.i).map((x) => x.r);
+  return riders
+    .map((r, i) => ({ r, i }))
+    .sort((a, b) => rank(a.r) - rank(b.r) || a.i - b.i)
+    .map(x => x.r);
 };
 
 const sanitize = (s: string): string => s.replace(/[/\\:*?"<>|\s]/g, '_');

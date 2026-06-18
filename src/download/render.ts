@@ -1,5 +1,6 @@
 import type { BankAccount, ClaimDetail } from '../api/claim.js';
 import type { DownloadedImage } from './images.js';
+import { eta } from './template.js';
 
 interface Field {
   label: string;
@@ -71,7 +72,7 @@ const bankFields = (acc: BankAccount): Field[] => [
 // Bank accounts come in pairs that duplicate each other; keep distinct ones only.
 const uniqueAccounts = (accounts: BankAccount[]): BankAccount[] => {
   const seen = new Set<string>();
-  return accounts.filter((a) => {
+  return accounts.filter(a => {
     const key = `${a.accNo}|${a.bankName}`;
     if (seen.has(key)) return false;
     seen.add(key);
@@ -79,7 +80,7 @@ const uniqueAccounts = (accounts: BankAccount[]): BankAccount[] => {
   });
 };
 
-const present = (rows: Field[]): Field[] => rows.filter((r) => r.value);
+const present = (rows: Field[]): Field[] => rows.filter(r => r.value);
 
 export const renderMarkdown = (
   claim: ClaimDetail,
@@ -87,7 +88,11 @@ export const renderMarkdown = (
   eob: string | null,
 ): string => {
   const table = (rows: Field[]) =>
-    ['| 项目 | 内容 |', '| --- | --- |', ...present(rows).map((r) => `| ${r.label} | ${r.value} |`)].join('\n');
+    [
+      '| 项目 | 内容 |',
+      '| --- | --- |',
+      ...present(rows).map(r => `| ${r.label} | ${r.value} |`),
+    ].join('\n');
 
   const section = (title: string, body: string, open: boolean) =>
     `<details${open ? ' open' : ''}>\n<summary>${title}</summary>\n\n${body}\n\n</details>`;
@@ -97,7 +102,10 @@ export const renderMarkdown = (
     .join('\n\n');
 
   const pics = images
-    .map(({ rider, file }) => `### ${rider.riderTypeName}\n\n![${rider.riderTypeName}](images/${file})`)
+    .map(
+      ({ rider, file }) =>
+        `### ${rider.riderTypeName}\n\n![${rider.riderTypeName}](images/${file})`,
+    )
     .join('\n\n');
 
   const sections = [
@@ -116,70 +124,32 @@ ${sections.join('\n\n')}
 `;
 };
 
-const escapeHtml = (s: string): string =>
-  s.replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]!));
-
-const htmlTable = (rows: Field[]): string =>
-  `<table>\n${present(rows)
-    .map((r) => `      <tr><th>${escapeHtml(r.label)}</th><td>${escapeHtml(r.value)}</td></tr>`)
-    .join('\n')}\n    </table>`;
-
 export const renderHtml = (
   claim: ClaimDetail,
   images: DownloadedImage[],
   eob: string | null,
 ): string => {
-  const banks = uniqueAccounts(claim.claimAccInfoReturns ?? [])
-    .map((acc, i) => `    <h3>账户 ${i + 1}</h3>\n    ${htmlTable(bankFields(acc))}`)
-    .join('\n');
-
-  const pics = images
-    .map(
-      ({ rider, file }) =>
-        `    <figure>\n      <figcaption>${escapeHtml(rider.riderTypeName)}</figcaption>\n      <a href="images/${file}" target="_blank">\n        <img src="images/${file}" alt="${escapeHtml(rider.riderTypeName)}">\n      </a>\n    </figure>`,
-    )
-    .join('\n');
-
-  const section = (summary: string, body: string, open: boolean) =>
-    `  <details${open ? ' open' : ''}>\n    <summary>${summary}</summary>\n${body}\n  </details>`;
-
   const sections = [
-    section(`基本信息<span class="status">${escapeHtml(claim.statusName)}</span>`, htmlTable(basicInfo(claim)), true),
-    section('就诊信息', htmlTable(visitInfo(claim)), true),
-    section('金额信息', htmlTable(amountInfo(claim)), true),
-    section('被保险人信息', htmlTable(insuredInfo(claim)), false),
-    section('银行账户', banks, false),
+    { title: '基本信息', status: claim.statusName, open: true, fields: present(basicInfo(claim)) },
+    { title: '就诊信息', open: true, fields: present(visitInfo(claim)) },
+    { title: '金额信息', open: true, fields: present(amountInfo(claim)) },
+    { title: '被保险人信息', open: false, fields: present(insuredInfo(claim)) },
+    {
+      title: '银行账户',
+      open: false,
+      accounts: uniqueAccounts(claim.claimAccInfoReturns ?? []).map(acc =>
+        present(bankFields(acc)),
+      ),
+    },
     ...(eob
-      ? [section('理赔说明书', `    <figure>\n      <a href="images/${eob}" target="_blank">\n        <img src="images/${eob}" alt="理赔说明书">\n      </a>\n    </figure>`, false)]
+      ? [{ title: '理赔说明书', open: false, images: [{ caption: '理赔说明书', file: eob }] }]
       : []),
-    section(`已上传理赔资料（${images.length} 张）`, pics, true),
+    {
+      title: `已上传理赔资料（${images.length} 张）`,
+      open: true,
+      images: images.map(({ rider, file }) => ({ caption: rider.riderTypeName, file })),
+    },
   ];
 
-  return `<!doctype html>
-<html lang="zh-CN">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>理赔 ${escapeHtml(claim.claimNo)}</title>
-  <style>
-    body { font-family: -apple-system, "PingFang SC", sans-serif; max-width: 800px; margin: 0 auto; padding: 1.5rem 1rem; color: #333; background: #f5f5f5; }
-    details { background: #fff; border-radius: 8px; padding: 1rem 1.25rem; margin-bottom: 1rem; }
-    summary { font-size: 1.1rem; font-weight: 700; border-left: 4px solid #f60; padding-left: .6rem; cursor: pointer; list-style-position: inside; }
-    summary .status { float: right; color: #f60; font-weight: 400; }
-    details[open] summary { margin-bottom: 1rem; }
-    h3 { font-size: .95rem; color: #666; margin: 1rem 0 .5rem; }
-    table { border-collapse: collapse; width: 100%; }
-    th, td { padding: .6rem .25rem; text-align: left; border-bottom: 1px solid #f0f0f0; vertical-align: top; }
-    th { color: #888; font-weight: 400; width: 10rem; }
-    td { color: #333; }
-    figure { margin: 0 0 1.25rem; }
-    figcaption { color: #666; margin-bottom: .5rem; }
-    img { max-width: 100%; border: 1px solid #eee; border-radius: 4px; }
-  </style>
-</head>
-<body>
-${sections.join('\n')}
-</body>
-</html>
-`;
+  return eta.render('claim', { claimNo: claim.claimNo, sections });
 };

@@ -10,7 +10,10 @@ export const setToken = (value: string): void => {
   token = value;
 };
 
-export const fetchWithSign = async <T = unknown>(path: string, payload: unknown = {}): Promise<T> => {
+export const fetchWithSign = async <T = unknown>(
+  path: string,
+  payload: unknown = {},
+): Promise<T> => {
   const body = JSON.stringify(payload);
   const timestamp = String(Date.now());
   const nonce = randomUUID().replace('-', '');
@@ -32,7 +35,9 @@ export const fetchWithSign = async <T = unknown>(path: string, payload: unknown 
 };
 
 export const negotiateSession = async (uuid: string): Promise<Session> => {
-  const { result } = await fetchWithSign<{ result: string[] }>('/appwechat/com/separated/ra', { uuid });
+  const { result } = await fetchWithSign<{ result: string[] }>('/appwechat/com/separated/ra', {
+    uuid,
+  });
   if (!Array.isArray(result) || result.length < 6) {
     throw new Error('Key negotiation failed: unexpected /separated/ra response');
   }

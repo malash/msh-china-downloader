@@ -1,12 +1,16 @@
 import { mkdir, writeFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import { join } from 'node:path';
+import { spawn } from 'node:child_process';
+import Bluebird from 'bluebird';
 import { ensureLogin } from './auth/login.js';
+import { checkSignatureSecret } from './auth/secret-check.js';
 import { getPersons, RELATIONSHIP } from './api/persons.js';
 import { getPolicies } from './api/policies.js';
 import { getClaimList, type ClaimSummary } from './api/claim-list.js';
 import { downloadClaim } from './download/claim.js';
 import { renderIndex, sortClaims, type PersonGroup } from './download/index-page.js';
+import { done, info, item, step } from './log.js';
 
 const OUTPUT_DIR = fileURLToPath(new URL('../output/', import.meta.url));
 const CLAIMS_DIR = join(OUTPUT_DIR, 'claims');
@@ -19,59 +23,77 @@ if (!username || !password) {
 
 // Optional cap for testing, to avoid downloading everything. Empty = no limit.
 const maxPerPerson = Number(process.env.MAX_CLAIMS_PER_PERSON) || Infinity;
+// How many claims to download in parallel.
+const concurrency = Number(process.env.CONCURRENCY) || 5;
 
 const sanitize = (s: string): string => s.replace(/[/\\:*?"<>|\s]/g, '_');
 
-const writeJson = (path: string, data: unknown) =>
-  writeFile(path, JSON.stringify(data, null, 2));
+const writeJson = (path: string, data: unknown) => writeFile(path, JSON.stringify(data, null, 2));
 
-console.log('Logging in...');
+step('Checking SIGNATURE_SECRET against latest app.js');
+await checkSignatureSecret(process.env.SIGNATURE_SECRET ?? '');
+
+step('Logging in');
 await ensureLogin(username, password);
 await mkdir(CLAIMS_DIR, { recursive: true });
 
-console.log('Fetching insured persons...');
 const persons = await getPersons(username);
 await writeJson(join(OUTPUT_DIR, 'persons.json'), persons);
-console.log(`Found ${persons.length} person(s).`);
+done(`Logged in — ${persons.length} insured person(s) found`);
 
 const groups: PersonGroup[] = [];
 
 for (const [pi, person] of persons.entries()) {
   const name = person.insuredFullCName;
   const relationship = RELATIONSHIP[person.relationship] ?? person.relationship;
-  console.log(`\n[${pi + 1}/${persons.length}] ${name} (${relationship})`);
+  step(`[${pi + 1}/${persons.length}] ${name} (${relationship})`);
 
   const personDir = join(CLAIMS_DIR, sanitize(person.insuredCName));
   await mkdir(personDir, { recursive: true });
 
   // Collect claims across every policy year, de-duplicated by claimNo.
-  console.log('  Fetching policy years...');
   const policies = await getPolicies(person.customID, username);
   await writeJson(join(personDir, 'policies.json'), policies);
-  console.log(`  ${policies.length} policy year(s): ${policies.map((p) => p.contYear).join(', ')}`);
+  info(`Policy years: ${policies.map(p => p.contYear).join(', ')}`);
 
   const byClaimNo = new Map<string, ClaimSummary>();
-  for (const policy of policies) {
-    const claims = await getClaimList(person.customID, policy.grpPlanCode, policy.contYear);
-    for (const c of claims) byClaimNo.set(c.claimNo, c);
-    console.log(`    year ${policy.contYear}: ${claims.length} claim(s)`);
-  }
+  await Bluebird.map(
+    policies,
+    async policy => {
+      const claims = await getClaimList(person.customID, policy.grpPlanCode, policy.contYear);
+      for (const c of claims) byClaimNo.set(c.claimNo, c);
+      item(`${policy.contYear}: ${claims.length} claim(s)`);
+    },
+    { concurrency },
+  );
   await writeJson(join(personDir, 'claims.json'), [...byClaimNo.values()]);
 
-  const ordered = sortClaims([...byClaimNo.values()].map((summary) => ({ summary, folder: '' })));
+  const ordered = sortClaims([...byClaimNo.values()].map(summary => ({ summary, folder: '' })));
   const selected = ordered.slice(0, maxPerPerson);
-  console.log(`  ${byClaimNo.size} unique claim(s), downloading ${selected.length}...`);
+  info(
+    `${byClaimNo.size} unique claim(s), downloading ${selected.length} (concurrency ${concurrency})`,
+  );
 
-  const rows = [];
-  for (const [ci, { summary }] of selected.entries()) {
-    process.stdout.write(`    [${ci + 1}/${selected.length}] ${summary.claimNo} (${summary.statusName})... `);
-    const folder = await downloadClaim(summary, person.insuredCName, CLAIMS_DIR);
-    console.log('done');
-    rows.push({ summary, folder });
-  }
+  let count = 0;
+  const rows = await Bluebird.map(
+    selected,
+    async ({ summary }) => {
+      const folder = await downloadClaim(summary, person.insuredCName, CLAIMS_DIR);
+      item(`[${++count}/${selected.length}] ${summary.claimNo} (${summary.statusName})`);
+      return { summary, folder };
+    },
+    { concurrency },
+  );
   groups.push({ name, relationship, claims: rows });
 }
 
-console.log('\nWriting index.html...');
-await writeFile(join(OUTPUT_DIR, 'index.html'), renderIndex(groups));
-console.log(`Done. Open ${join(OUTPUT_DIR, 'index.html')}`);
+step('Writing index.html');
+const indexPath = join(OUTPUT_DIR, 'index.html');
+await writeFile(indexPath, renderIndex(groups));
+
+if (process.platform === 'darwin') {
+  done(`Opening ${indexPath}`);
+  spawn('open', [indexPath], { detached: true, stdio: 'ignore' }).unref();
+} else {
+  done(`Saved to ${indexPath}`);
+}

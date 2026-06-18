@@ -49,16 +49,21 @@ export const downloadImages = async (riders: Rider[], dir: string): Promise<Down
 
   const images: DownloadedImage[] = [];
   const used = new Map<string, number>();
+  let unknown = 0;
   for (const rider of riders) {
-    let name = sanitize(rider.riderTypeName);
-    const seen = used.get(name) ?? 0;
-    used.set(name, seen + 1);
-    if (seen > 0) name = `${name}_${seen + 1}`;
+    let name = sanitize(rider.riderTypeName.trim());
+    if (!name) {
+      unknown += 1;
+      name = `UNKNOWN${unknown === 1 ? '' : unknown}`;
+    } else {
+      const seen = used.get(name) ?? 0;
+      used.set(name, seen + 1);
+      if (seen > 0) name = `${name}_${seen + 1}`;
+    }
 
     const saved = await downloadFile(rider.riderPath, dir, name);
     if (saved) images.push({ rider, file: saved.file });
   }
-  process.stdout.write(`${images.length} image(s) `);
   return images;
 };
 
