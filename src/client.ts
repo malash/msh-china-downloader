@@ -18,11 +18,35 @@ const sign = (timestamp: string, nonce: string, body: string, query = '{}'): str
   return createHmac('sha256', secret).update(`${timestamp}&${nonce}&${body}${query}`).digest('hex');
 };
 
+// Recursively replace null with '' — the server normalizes the body this way
+// before verifying the signature, so a request carrying a literal null is rejected.
+const nullClean = (value: unknown): unknown => {
+  if (value === null) return '';
+  if (Array.isArray(value)) return value.map(nullClean);
+  if (typeof value === 'object') {
+    return Object.fromEntries(
+      Object.entries(value as Record<string, unknown>).map(([k, v]) => [k, nullClean(v)]),
+    );
+  }
+  return value;
+};
+
+// ASCII-sort the top-level keys. The server canonicalizes the body the same way
+// before recomputing the HMAC, so an unsorted body fails signature verification.
+const sortAscii = (obj: Record<string, unknown>): Record<string, unknown> =>
+  Object.fromEntries(Object.entries(obj).sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0)));
+
 export const fetchWithSign = async <T = unknown>(
   path: string,
   payload: unknown = {},
 ): Promise<T> => {
-  const body = JSON.stringify(payload);
+  // Sign and send the SAME canonicalized body the server expects.
+  const cleaned = nullClean(payload);
+  const canonical =
+    cleaned && typeof cleaned === 'object' && !Array.isArray(cleaned)
+      ? sortAscii(cleaned as Record<string, unknown>)
+      : cleaned;
+  const body = JSON.stringify(canonical);
   const timestamp = String(Date.now());
   const nonce = randomUUID().replace('-', '');
 
