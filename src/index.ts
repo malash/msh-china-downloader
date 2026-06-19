@@ -10,7 +10,7 @@ import { getPolicies } from './api/policies.js';
 import { getClaimList, type ClaimSummary } from './api/claim-list.js';
 import { downloadClaim } from './download/claim.js';
 import { renderIndex, sortClaims, type PersonGroup } from './download/index-page.js';
-import { done, info, item, step } from './log.js';
+import { done, error, info, item, step } from './log.js';
 import { sanitize } from './util.js';
 
 const OUTPUT_DIR = fileURLToPath(new URL('../output/', import.meta.url));
@@ -19,7 +19,8 @@ const CLAIMS_DIR = join(OUTPUT_DIR, 'claims');
 const account = process.env.MSH_ACCOUNT;
 const password = process.env.MSH_PASSWORD;
 if (!account || !password) {
-  throw new Error('Missing MSH_ACCOUNT / MSH_PASSWORD environment variables (set them in .env)');
+  error('Missing MSH_ACCOUNT / MSH_PASSWORD environment variables (set them in .env)');
+  process.exit(1);
 }
 
 // Optional cap for testing, to avoid downloading everything. Empty = no limit.

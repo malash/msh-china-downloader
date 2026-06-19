@@ -168,8 +168,8 @@ output/
   `dump-test.ts`）打印响应，**摸清楚、把结论折进正式代码后就删掉**，不要留在仓库里。
 - 理赔和年度的抓取用 bluebird 的 `Promise.map` 做并发，并发数由环境变量 `CONCURRENCY`
   控制（默认 5）。
-- HTML 一律走 Eta 模板，不要把标记字符串塞进
-  `.ts`；模板里尽量不写 JS（总览页为了"整行可点击" 用了内联 `onclick`，这是唯一的例外）。
+- HTML 一律走 Eta 模板，不要把标记字符串塞进 `.ts`；模板里不写 JS（总览页的"整行可点击"用块级
+  `<a>` 填满单元格实现，不用 onclick）。
 - 日志统一用 `src/log.ts` 里的 `step` / `info` / `item` / `done` / `warn`，保证输出有层次、整洁。
 - 协议随时可能因为对方改版而失效。真出问题时，重新下载
   `https://wechat.mshasia.com/wechat/static/js/app.<hash>.js`（hash 每次部署都变，入口 HTML 里有当前文件名），beautify 之后重新追踪加密模块——它是 webpack 模块

@@ -8,14 +8,16 @@
     body { font-family: -apple-system, "PingFang SC", sans-serif; max-width: 1400px; margin: 0 auto; padding: 1.5rem 1rem; color: #333; background: #f5f5f5; }
     h1 { font-size: 1.4rem; }
     details { background: #fff; border-radius: 8px; padding: 1rem 1.25rem; margin-bottom: 1rem; }
+    .gen { font-size: .85rem; color: #999; margin: -.4rem 0 1.2rem; }
     summary { font-size: 1.1rem; font-weight: 700; border-left: 4px solid #f60; padding-left: .6rem; cursor: pointer; list-style-position: inside; }
     details[open] summary { margin-bottom: 1rem; }
     table { border-collapse: collapse; width: 100%; }
-    th, td { padding: .55rem .5rem; text-align: left; border-bottom: 1px solid #f0f0f0; }
-    th { color: #888; font-weight: 400; font-size: .85rem; }
-    tbody tr { cursor: pointer; }
+    th, td { text-align: left; border-bottom: 1px solid #f0f0f0; }
+    th { padding: .55rem .5rem; color: #888; font-weight: 400; font-size: .85rem; }
+    td { padding: 0; }
+    td a { display: block; padding: .55rem .5rem; color: inherit; text-decoration: none; }
     tbody tr:hover { background: #fff8f2; }
-    tbody tr td:last-child { color: #f60; }
+    tbody tr td:last-child a { color: #f60; }
     .status { padding: .1rem .5rem; border-radius: 4px; font-size: .85rem; white-space: nowrap; }
     .status.s2 { background: #fde8e8; color: #d33; }
     .status.s3 { background: #fff3e0; color: #f60; }
@@ -24,7 +26,8 @@
   </style>
 </head>
 <body>
-  <h1>理赔下载（<%= it.total %> 条）</h1>
+  <h1>理赔下载</h1>
+  <p class="gen"><%= it.groups.length %> 位被保险人 · 共 <%= it.total %> 条理赔 · 生成于 <%= it.generatedAt %></p>
 <% it.groups.forEach(function (g) { %>
   <details>
     <summary><%= g.name %>（<%= g.relationship %>） · <%= g.claims.length %> 条</summary>
@@ -34,15 +37,15 @@
       </thead>
       <tbody>
 <% g.claims.forEach(function (c) { %>
-        <tr data-href="<%= c.href %>" onclick="window.open(this.dataset.href, '_blank')">
-          <td><%= c.dateRange %></td>
-          <td><%= c.claimType %></td>
-          <td><%= c.payTo %></td>
-          <td><span class="status s<%= c.status %><%= c.noPay ? ' no-pay' : '' %>"><%= c.statusName %></span></td>
-          <td<% if (c.hospitalEn) { %> title="<%= c.hospitalEn %>"<% } %>><%= c.hospital %></td>
-          <td><%= c.invoiceAmount %></td>
-          <td><%= c.payAmount %></td>
-          <td><%= c.claimNo %></td>
+        <tr>
+          <td><a href="<%= c.href %>"><%= c.dateRange %></a></td>
+          <td><a href="<%= c.href %>"><%= c.claimType %></a></td>
+          <td><a href="<%= c.href %>"><%= c.payTo %></a></td>
+          <td><a href="<%= c.href %>"><span class="status s<%= c.status %><%= c.noPay ? ' no-pay' : '' %>"><%= c.statusName %></span></a></td>
+          <td<% if (c.hospitalEn) { %> title="<%= c.hospitalEn %>"<% } %>><a href="<%= c.href %>"><%= c.hospital %></a></td>
+          <td><a href="<%= c.href %>"><%= c.invoiceAmount %></a></td>
+          <td><a href="<%= c.href %>"><%= c.payAmount %></a></td>
+          <td><a href="<%= c.href %>"><%= c.claimNo %></a></td>
         </tr>
 <% }) %>
       </tbody>

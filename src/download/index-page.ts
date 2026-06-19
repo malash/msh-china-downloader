@@ -29,6 +29,15 @@ export const sortClaims = (claims: ClaimRow[]): ClaimRow[] =>
 const money = (currency: string, amount: string): string =>
   hasAmount(amount) ? `${currency} ${amount}` : '--';
 
+// Local time as `YYYY-MM-DD HH:mm:ss`.
+const formatTimestamp = (d: Date): string => {
+  const p = (n: number) => String(n).padStart(2, '0');
+  return (
+    `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())} ` +
+    `${p(d.getHours())}:${p(d.getMinutes())}:${p(d.getSeconds())}`
+  );
+};
+
 export const renderIndex = (groups: PersonGroup[]): string => {
   const view = groups.map(g => ({
     name: g.name,
@@ -57,5 +66,6 @@ export const renderIndex = (groups: PersonGroup[]): string => {
     })),
   }));
   const total = groups.reduce((n, g) => n + g.claims.length, 0);
-  return eta.render('index', { total, groups: view });
+  const generatedAt = formatTimestamp(new Date());
+  return eta.render('index', { total, groups: view, generatedAt });
 };
