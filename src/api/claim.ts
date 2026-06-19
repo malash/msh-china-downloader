@@ -20,6 +20,7 @@ export interface BankAccount {
 export interface InsuredInfo {
   insuredFullCName: string;
   insuredEName: string;
+  relationship: string;
   sex: string;
   birthday: string;
   idTypeName: string;
@@ -49,6 +50,7 @@ export interface ClaimDetail {
   startDate: string;
   endDate: string;
   claimTypeName: string;
+  payTo: string;
   hChineseName: string;
   hEnglishName: string;
   countryOfHospitail: string;

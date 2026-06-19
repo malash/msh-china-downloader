@@ -67,7 +67,14 @@ for (const [pi, person] of persons.entries()) {
   );
   await writeJson(join(personDir, 'claims.json'), [...byClaimNo.values()]);
 
-  const ordered = sortClaims([...byClaimNo.values()].map(summary => ({ summary, folder: '' })));
+  const ordered = sortClaims(
+    [...byClaimNo.values()].map(summary => ({
+      summary,
+      folder: '',
+      claimTypeName: '',
+      payToName: '',
+    })),
+  );
   const selected = ordered.slice(0, maxPerPerson);
   info(
     `${byClaimNo.size} unique claim(s), downloading ${selected.length} (concurrency ${concurrency})`,
@@ -77,9 +84,13 @@ for (const [pi, person] of persons.entries()) {
   const rows = await Bluebird.map(
     selected,
     async ({ summary }) => {
-      const folder = await downloadClaim(summary, person.insuredCName, CLAIMS_DIR);
+      const { folder, claimTypeName, payToName } = await downloadClaim(
+        summary,
+        person.insuredCName,
+        CLAIMS_DIR,
+      );
       item(`[${++count}/${selected.length}] ${summary.claimNo} (${summary.statusName})`);
-      return { summary, folder };
+      return { summary, folder, claimTypeName, payToName };
     },
     { concurrency },
   );

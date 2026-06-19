@@ -1,6 +1,7 @@
 import type { BankAccount, ClaimDetail } from '../api/claim.js';
 import type { DownloadedImage } from './images.js';
 import { eta } from './template.js';
+import { RELATIONSHIP } from '../api/persons.js';
 import { hasAmount, toRelativeUrl } from '../util.js';
 
 interface Field {
@@ -9,6 +10,10 @@ interface Field {
 }
 
 const SEX: Record<string, string> = { '01': '男', '02': '女' };
+
+// Detail's payTo is Member/Provider; map to the labels the official app implies.
+export const PAY_TO: Record<string, string> = { Member: '本人', Provider: '医院直付' };
+export const payToName = (payTo: string): string => PAY_TO[payTo] ?? payTo;
 
 const money = (currency: string, amount: string): string =>
   hasAmount(amount) ? `${currency} ${amount}` : '';
@@ -35,6 +40,7 @@ const visitInfo = (claim: ClaimDetail): Field[] => [
 ];
 
 const amountInfo = (claim: ClaimDetail): Field[] => [
+  { label: '赔付方式', value: payToName(claim.payTo) },
   { label: '就诊金额', value: money(claim.invoiceCurrency, claim.invoiceAmount) },
   { label: '发票张数', value: claim.invoiceNumber },
   { label: '免赔额', value: money(claim.invoiceCurrency, claim.deductible) },
@@ -47,6 +53,7 @@ const insuredInfo = (claim: ClaimDetail): Field[] => {
   const i = claim.insuredInfoReturn ?? ({} as ClaimDetail['insuredInfoReturn']);
   return [
     { label: '姓名', value: i.insuredFullCName || claim.insuredName },
+    { label: '与投保人关系', value: RELATIONSHIP[i.relationship] ?? i.relationship },
     { label: '性别', value: SEX[i.sex] ?? '' },
     { label: '出生日期', value: i.birthday },
     { label: '证件类型', value: i.idTypeName },

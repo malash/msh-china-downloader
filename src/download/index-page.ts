@@ -5,6 +5,8 @@ import { hasAmount } from '../util.js';
 export interface ClaimRow {
   summary: ClaimSummary;
   folder: string;
+  claimTypeName: string;
+  payToName: string;
 }
 
 export interface PersonGroup {
@@ -31,12 +33,22 @@ export const renderIndex = (groups: PersonGroup[]): string => {
   const view = groups.map(g => ({
     name: g.name,
     relationship: g.relationship,
-    claims: sortClaims(g.claims).map(({ summary, folder }) => ({
+    claims: sortClaims(g.claims).map(({ summary, folder, claimTypeName, payToName }) => ({
       href: `claims/${folder}/index.html`,
-      startDate: summary.startDate,
+      // 就诊日期: always show as start~end (both ends, even when identical).
+      dateRange: summary.endDate
+        ? `${summary.startDate}~${summary.endDate}`
+        : summary.startDate,
+      claimType: claimTypeName,
+      payTo: payToName,
       status: summary.status,
       statusName: summary.statusName,
       hospital: summary.hChineseName,
+      // English hospital name for a native title tooltip; omit if same/empty.
+      hospitalEn:
+        summary.hEnglishName && summary.hEnglishName !== summary.hChineseName
+          ? summary.hEnglishName
+          : '',
       invoiceAmount: money(summary.invoiceCurrency, summary.invoiceAmount),
       payAmount: money(summary.currency, summary.payAmount),
       // settled (1/4/5) but paid nothing → flag the status tag red

@@ -4,7 +4,7 @@ import { getClaimDetail, type Rider } from '../api/claim.js';
 import type { ClaimSummary } from '../api/claim-list.js';
 import { getEobFileInfo } from '../api/eob.js';
 import { downloadImages, downloadOptional } from './images.js';
-import { renderHtml, renderMarkdown } from './render.js';
+import { renderHtml, renderMarkdown, payToName } from './render.js';
 import { sanitize, toRelativeUrl } from '../util.js';
 
 // 病历, 原始发票/收据, 费用明细 first; everything else keeps its original order after.
@@ -21,13 +21,23 @@ const sortRiders = (riders: Rider[]): Rider[] => {
     .map(x => x.r);
 };
 
-// Saves the claim into `${claimsDir}/${name}/${date}_${claimNo}/` and returns
-// the `${name}/${date}_${claimNo}` path relative to claimsDir.
+export interface ClaimResult {
+  // `${name}/${date}_${claimNo}` path relative to claimsDir.
+  folder: string;
+  // Human-readable claim type (e.g. 门诊). Only the detail carries it; the list
+  // response only has the numeric `claimType` code, so we surface it from here.
+  claimTypeName: string;
+  // Who the claim is paid to: 本人 (reimbursed) / 医院直付 (direct billing). The
+  // detail returns Member/Provider; the list only has an unmapped numeric code.
+  payToName: string;
+}
+
+// Saves the claim into `${claimsDir}/${name}/${date}_${claimNo}/`.
 export const downloadClaim = async (
   summary: ClaimSummary,
   personName: string,
   claimsDir: string,
-): Promise<string> => {
+): Promise<ClaimResult> => {
   const claim = await getClaimDetail(summary.claimNo, summary.employeeId);
 
   const segments = [sanitize(personName), sanitize(`${summary.startDate}_${claim.claimNo}`)];
@@ -51,5 +61,9 @@ export const downloadClaim = async (
     writeFile(join(dir, 'index.html'), renderHtml(claim, images, eob)),
   ]);
 
-  return toRelativeUrl(segments);
+  return {
+    folder: toRelativeUrl(segments),
+    claimTypeName: claim.claimTypeName,
+    payToName: payToName(claim.payTo),
+  };
 };
