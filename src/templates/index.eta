@@ -38,14 +38,14 @@
       <tbody>
 <% g.claims.forEach(function (c) { %>
         <tr>
-          <td><a href="<%= c.href %>"><%= c.dateRange %></a></td>
-          <td><a href="<%= c.href %>"><%= c.claimType %></a></td>
-          <td><a href="<%= c.href %>"><%= c.payTo %></a></td>
-          <td><a href="<%= c.href %>"><span class="status s<%= c.status %><%= c.noPay ? ' no-pay' : '' %>"><%= c.statusName %></span></a></td>
-          <td<% if (c.hospitalEn) { %> title="<%= c.hospitalEn %>"<% } %>><a href="<%= c.href %>"><%= c.hospital %></a></td>
-          <td><a href="<%= c.href %>"><%= c.invoiceAmount %></a></td>
-          <td><a href="<%= c.href %>"><%= c.payAmount %></a></td>
-          <td><a href="<%= c.href %>"><%= c.claimNo %></a></td>
+          <td><a href="<%= c.href %>" target="_blank"><%= c.dateRange %></a></td>
+          <td><a href="<%= c.href %>" target="_blank"><%= c.claimType %></a></td>
+          <td><a href="<%= c.href %>" target="_blank"><%= c.payTo %></a></td>
+          <td><a href="<%= c.href %>" target="_blank"><span class="status s<%= c.status %><%= c.noPay ? ' no-pay' : '' %>"><%= c.statusName %></span></a></td>
+          <td<% if (c.hospitalEn) { %> title="<%= c.hospitalEn %>"<% } %>><a href="<%= c.href %>" target="_blank"><%= c.hospital %></a></td>
+          <td><a href="<%= c.href %>" target="_blank"><%= c.invoiceAmount %></a></td>
+          <td><a href="<%= c.href %>" target="_blank"><%= c.payAmount %></a></td>
+          <td><a href="<%= c.href %>" target="_blank"><%= c.claimNo %></a></td>
         </tr>
 <% }) %>
       </tbody>
