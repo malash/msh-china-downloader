@@ -54,8 +54,8 @@ const aesDecrypt = (session: Session, ciphertextB64: string): string => {
     Buffer.from(session.key, 'utf8'),
     Buffer.from(session.iv, 'utf8'),
   );
-  const input = Buffer.from(ciphertextB64.replace(/\s/g, '+'), 'base64');
-  return Buffer.concat([decipher.update(input), decipher.final()]).toString('utf8');
+  const normalized = ciphertextB64.replace(/\s/g, '+');
+  return Buffer.concat([decipher.update(normalized, 'base64'), decipher.final()]).toString('utf8');
 };
 
 export const rsaEncrypt = (session: Session, plaintext: string): string =>
