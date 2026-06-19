@@ -1,6 +1,4 @@
-import { randomUUID } from 'node:crypto';
-import { sign } from '../crypto/sign.js';
-import { buildSession, type Session } from '../crypto/cipher.js';
+import { createHmac, randomUUID } from 'node:crypto';
 
 const BASE_URL = 'https://wechat.mshasia.com';
 
@@ -8,6 +6,16 @@ let token = 'null';
 
 export const setToken = (value: string): void => {
   token = value;
+};
+
+// HMAC-SHA256 over `${timestamp}&${nonce}&${body}${query}`. For POST the query is
+// the literal "{}", concatenated to the body with NO separator (easy to get wrong).
+const sign = (timestamp: string, nonce: string, body: string, query = '{}'): string => {
+  const secret = process.env.SIGNATURE_SECRET;
+  if (!secret) {
+    throw new Error('Missing SIGNATURE_SECRET environment variable (set it in .env)');
+  }
+  return createHmac('sha256', secret).update(`${timestamp}&${nonce}&${body}${query}`).digest('hex');
 };
 
 export const fetchWithSign = async <T = unknown>(
@@ -32,14 +40,4 @@ export const fetchWithSign = async <T = unknown>(
   });
 
   return response.json() as Promise<T>;
-};
-
-export const negotiateSession = async (uuid: string): Promise<Session> => {
-  const { result } = await fetchWithSign<{ result: string[] }>('/appwechat/com/separated/ra', {
-    uuid,
-  });
-  if (!Array.isArray(result) || result.length < 6) {
-    throw new Error('Key negotiation failed: unexpected /separated/ra response');
-  }
-  return buildSession(result);
 };

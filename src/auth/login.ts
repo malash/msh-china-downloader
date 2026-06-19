@@ -1,6 +1,7 @@
 import { randomUUID } from 'node:crypto';
-import { fetchWithSign, negotiateSession, setToken } from '../http/client.js';
-import { encryptJson, generateUuid } from '../crypto/cipher.js';
+import { fetchWithSign, setToken } from '../client.js';
+import { encryptJson } from '../crypto/cipher.js';
+import { negotiateSession } from '../crypto/session.js';
 
 interface LoginResult {
   token: string;
@@ -10,7 +11,7 @@ interface LoginResult {
 }
 
 export const login = async (account: string, password: string): Promise<LoginResult> => {
-  const session = await negotiateSession(generateUuid());
+  const session = await negotiateSession();
 
   const securityData = encryptJson(session, {
     account,

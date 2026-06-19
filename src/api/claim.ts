@@ -1,5 +1,6 @@
-import { fetchWithSign, negotiateSession } from '../http/client.js';
-import { decryptResult, encryptParam, generateUuid, rsaEncrypt } from '../crypto/cipher.js';
+import { fetchWithSign } from '../client.js';
+import { decryptResult, encryptParam, rsaEncrypt } from '../crypto/cipher.js';
+import { negotiateSession } from '../crypto/session.js';
 
 export interface Rider {
   riderType: string;
@@ -76,8 +77,7 @@ export const getClaimDetail = async (
   employeeId: string,
   olClaimNo = '',
 ): Promise<ClaimDetail> => {
-  const uuid = generateUuid();
-  const session = await negotiateSession(uuid);
+  const session = await negotiateSession();
 
   const { success, result, msg } = await fetchWithSign<{
     success: string;
@@ -88,7 +88,7 @@ export const getClaimDetail = async (
     employeeId: encryptParam(session, employeeId),
     language: 'zh_cn',
     olClaimNo,
-    uuid,
+    uuid: session.uuid,
   });
 
   if (success !== 't') {

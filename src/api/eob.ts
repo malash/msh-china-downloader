@@ -1,4 +1,4 @@
-import { fetchWithSign } from '../http/client.js';
+import { fetchWithSign } from '../client.js';
 
 export interface EobFileInfo {
   picUrl: string;

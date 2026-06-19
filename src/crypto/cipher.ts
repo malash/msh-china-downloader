@@ -9,6 +9,7 @@ import {
 } from 'node:crypto';
 
 export interface Session {
+  uuid: string;
   publicKey: KeyObject;
   key: string;
   iv: string;
@@ -40,7 +41,8 @@ const deobfuscatePublicKey = (raw: string): KeyObject => {
 const IV_MAP: Record<string, string> = { '@': 'W', '*': 'K', '!': '1' };
 const KEY_MAP: Record<string, string> = { '#': 'W', '=': 'Y', $: '4' };
 
-export const buildSession = (raResult: string[]): Session => ({
+export const buildSession = (uuid: string, raResult: string[]): Session => ({
+  uuid,
   publicKey: deobfuscatePublicKey(raResult[1]),
   iv: raResult[2].replace(/[@*!]/g, c => IV_MAP[c]),
   key: raResult[5].replace(/[#=$]/g, c => KEY_MAP[c]),

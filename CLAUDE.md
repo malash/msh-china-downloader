@@ -146,10 +146,9 @@ output/
 
 ## 代码组织
 
-- `src/http/client.ts` ——
-  `fetchWithSign`（给每个请求加签名 header）、可变的 token（`setToken`，登录后更新）、以及
-  `negotiateSession`（封装上面的密钥协商）。
-- `src/crypto/` —— `sign.ts` 是 HMAC 签名，`cipher.ts` 是 RSA/AES 会话加解密。
+- `src/client.ts` —— `fetchWithSign`（给每个请求加签名 header，HMAC 签名也内联在这里）、可变的
+  token（`setToken`，登录后更新）。
+- `src/crypto/` —— `cipher.ts` 是 RSA/AES 会话加解密，`session.ts` 是密钥协商（`negotiateSession`）。
 - `src/auth/` ——
   `login.ts`（登录，每次运行都重新登录、token 只存内存）、`secret-check.ts`（启动时校验 secret）。
 - `src/api/`
