@@ -124,11 +124,16 @@ getClaimDetail 每条理赔 → 完整详情
   `result.url`（同名 PDF）两个 URL，两者都下载（页面显示图片、点击打开 PDF）。`success !== 't'` 或无
   `picUrl` 表示这条没有 EOB。注意 EOB 与理赔是否结案**无关**，处理中的理赔也可能有。
 - 附件图片是公开 URL，不需要鉴权就能下。但我们仍然把它们下载到本地，以保证最终产物完全离线。
+- 附件 URL 可以当作**不可变**的：文件名是上传时生成的随机 ID（多为 UUID），补件、重传都会产生新 URL；同一条理赔重复拉详情，URL 也不变。所以附件按 URL 的 SHA-256 缓存在
+  `output/.cache/<hash>.<ext>` （`yarn clean` 的 glob `output/{*,.!(cache)}`
+  显式排除了它，缓存得以保留），重跑时只下新增的附件。同一个 URL 常被多条理赔共用（证件照、一次提交拆成多个理赔号），缓存里也只存一份。EOB 每次调
+  `getEobFileInfo` 都会重新生成，所以不缓存。怀疑缓存有问题时删掉 `output/.cache/` 即可。
 
 ## 产物结构
 
 ```
 output/
+├── .cache/                 附件缓存（按 URL 哈希命名），跨运行保留，产物不引用它
 ├── index.html              总览：每位被保险人一个可折叠区块，理赔列表表格
 ├── persons.json            账户下所有人的原始数据
 └── claims/
@@ -142,13 +147,14 @@ output/
             └── images/     所有附件 + EOB，已下载到本地
 ```
 
-整个站点是相对路径、图片本地化的，可以离线浏览。
+整个站点是相对路径、图片本地化的，可以离线浏览。每个理赔目录都有自己的图片副本，不依赖其他理赔或缓存。
 
 ## 代码组织
 
-- `src/client.ts` —— `fetchWithSign`（给每个请求加签名 header，HMAC 签名也内联在这里）、可变的
-  token（`setToken`，登录后更新）。
-- `src/crypto/` —— `cipher.ts` 是 RSA/AES 会话加解密，`session.ts` 是密钥协商（`negotiateSession`）。
+- `src/client.ts` ——
+  `fetchWithSign`（给每个请求加签名 header，HMAC 签名也内联在这里）、可变的 token（`setToken`，登录后更新）。
+- `src/crypto/` —— `cipher.ts` 是 RSA/AES 会话加解密，`session.ts`
+  是密钥协商（`negotiateSession`）。
 - `src/auth/` ——
   `login.ts`（登录，每次运行都重新登录、token 只存内存）、`secret-check.ts`（启动时校验 secret）。
 - `src/api/`
@@ -168,8 +174,8 @@ output/
   `dump-test.ts`）打印响应，**摸清楚、把结论折进正式代码后就删掉**，不要留在仓库里。
 - 理赔和年度的抓取用 bluebird 的 `Promise.map` 做并发，并发数由环境变量 `CONCURRENCY`
   控制（默认 5）。
-- HTML 一律走 Eta 模板，不要把标记字符串塞进 `.ts`；模板里不写 JS（总览页的"整行可点击"用块级
-  `<a>` 填满单元格实现，不用 onclick）。
+- HTML 一律走 Eta 模板，不要把标记字符串塞进 `.ts`；模板里不写 JS（总览页的"整行可点击"用块级 `<a>`
+  填满单元格实现，不用 onclick）。
 - 日志统一用 `src/log.ts` 里的 `step` / `info` / `item` / `done` / `warn`，保证输出有层次、整洁。
 - 协议随时可能因为对方改版而失效。真出问题时，重新下载
   `https://wechat.mshasia.com/wechat/static/js/app.<hash>.js`（hash 每次部署都变，入口 HTML 里有当前文件名），beautify 之后重新追踪加密模块——它是 webpack 模块
