@@ -1,7 +1,7 @@
-import { copyFile, mkdir, rename, rm } from 'node:fs/promises';
+import { copyFile, mkdir } from 'node:fs/promises';
 import { createWriteStream, existsSync } from 'node:fs';
 import { pipeline } from 'node:stream/promises';
-import { createHash, randomUUID } from 'node:crypto';
+import { createHash } from 'node:crypto';
 import { basename, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import type { Rider } from '../api/claim.js';
@@ -67,23 +67,20 @@ const downloadCached = async (url: string, dir: string, name: string): Promise<s
   const ext = CACHEABLE_EXT.get(new URL(url).pathname.split('.').pop()!.toLowerCase());
   if (!ext) return downloadFile(url, dir, name);
 
-  const hash = createHash('sha256').update(url).digest('hex');
-  const cachePath = join(CACHE_DIR, `${hash}.${ext}`);
-  if (!existsSync(cachePath)) {
-    await mkdir(CACHE_DIR, { recursive: true });
-    // Unique temp name: concurrent claims may share an attachment. Rename only once complete,
-    // so an interrupted download never leaves a truncated file in the cache.
-    const tmp = `${cachePath}.${randomUUID()}.tmp`;
-    try {
-      if (!(await fetchFile(url, () => tmp))) return null;
-      await rename(tmp, cachePath);
-    } finally {
-      await rm(tmp, { force: true });
-    }
+  const file = `${name}.${ext}`;
+  const path = join(dir, file);
+  const cachePath = join(CACHE_DIR, `${createHash('sha256').update(url).digest('hex')}.${ext}`);
+
+  if (existsSync(cachePath)) {
+    await copyFile(cachePath, path);
+    return file;
   }
 
-  const file = `${name}.${ext}`;
-  await copyFile(cachePath, join(dir, file));
+  // Download into the claim folder first and copy into the cache only once it's complete, so an
+  // interrupted download never reaches the cache (`yarn clean` wipes the claim folder next run).
+  if (!(await fetchFile(url, () => path))) return null;
+  await mkdir(CACHE_DIR, { recursive: true });
+  await copyFile(path, cachePath);
   return file;
 };
 
